@@ -626,7 +626,7 @@ For instruction matching and trust during restore, see [store and trust checkpoi
 
 Pass `instruction_files=[Path("method.md")]` to `agent.session()` to load trusted UTF-8 files as part of the application instructions. The SDK reads these paths on the application host. Choose them in trusted code. When restoring a portable checkpoint, supply matching instructions and file content.
 
-Read `recorded_turn.get("receipt")` from `session.turns()` to inspect the settings the runtime selected for the turn's latest recorded model sampling attempt. The receipt can identify the model, reasoning effort, Codex revision and source tree, whether user configuration applied, and the selected executor and approval policy. The executor entry describes its write roots and network policy. It lists loaded instruction file paths, source categories and SHA-256 hashes, along with the hash of the developer instructions.
+Read `recorded_turn.get("receipt")` from `session.turns()` to inspect the settings the runtime selected for the turn's latest recorded model sampling attempt. The receipt can identify the model, reasoning effort, Codex revision and source tree, whether user configuration applied, and the selected executor and approval policy. The executor entry describes its write roots and network policy. The receipt lists loaded instruction file paths, source categories and SHA-256 hashes, along with the hash of the developer instructions.
 
 Use the file hash to check the version of a method file the runtime loaded. The receipt describes the runtime's settings. The provider can still reject or route the request. To verify later tool reads or external effects, use their records separately. Treat missing receipts or fields as unknown.
 
