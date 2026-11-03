@@ -296,7 +296,7 @@ If saving fails, the run fails. Unfinished child work can prevent saving. Live p
 
 ### Restore executor policy
 
-For a portable checkpoint with an executor, the SDK saves a digest of the applied executor policy if the checkpoint captures a pending manual call, uses a local executor, enables strict writes, or sets a managed network policy. Supply an Environment that matches the saved digest. For an idle checkpoint made with a WSS Environment that omits both `writable_roots` and `network`, restore uses the current Environment without comparing an executor policy digest.
+For a portable checkpoint with a local executor or a WSS Environment that sets `writable_roots`, restore requires a matching executor policy, including the strict write mode. If the saved WSS Environment omitted `writable_roots`, restore can use a different working directory. Keep that implicit write mode when restoring a pending manual checkpoint or a checkpoint with a managed network policy. For an idle WSS checkpoint made with both `writable_roots` and `network` omitted, restore uses the current Environment without comparing an executor policy digest.
 
 When reopening with `LocalStorage`, match the policy if the latest recorded receipt includes an executor. To match a policy, supply the same working directory, last applied write roots and network policy. Include any replacement made with `submit(writable_roots=...)`. The Environment supplied by current application code determines the grants. Portable checkpoints also compare their saved network digest as described below.
 
