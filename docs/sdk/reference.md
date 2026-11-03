@@ -67,7 +67,7 @@ A Session owns a native conversation, opened with `agent.session()` in an async 
 | `await session.fork()` | Return independent `SessionState`, leaving the source usable. Workspace files are not copied. See [save and restore](sessions.md#compact-save-and-restore) for storage, descendant and programmatic-state limits. |
 | `await session.suspend()` | Capture a supported manual boundary and retire the Session. See [manual suspension](sessions.md#saving-a-settled-manual-request). |
 | `await session.checkpoint_status(*, kind)` | Return `CheckpointStatus` with `status` (`"ready"`, `"not_ready"`, or `"unknown"`) and `reasons` for `kind="idle"` or `"manual_wait"`. It reserves nothing. Capture checks readiness again. |
-| `session.items(*, subagent_id=None)` | Async iterator over a snapshot of recorded items. |
+| `session.items(*, subagent_id=None)` | Async iterator over a snapshot of recorded items, including provider call and output rows and [typed execution completions](sessions.md#inspect-completed-execution). |
 | `session.turns(*, subagent_id=None)` | Async iterator over recorded turns and any [settings receipts](sessions.md#check-applied-instructions-and-settings). |
 | `session.subagents()` | Async iterator over captured Subagent records. |
 

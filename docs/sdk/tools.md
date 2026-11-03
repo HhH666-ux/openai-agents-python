@@ -458,7 +458,7 @@ turn = await session.submit(
 await turn.get_result()
 ```
 
-The output directory must already exist on the executor. The working directory stays writable. An empty list clears the additional grants. Omit `writable_roots` to keep the last applied policy. Start a new conversation to change the [network policy](#network-and-local-socket-access). When reopening or restoring, supply the last recorded policy with the current Environment. See [restore executor policy](sessions.md#restore-executor-policy).
+The output directory must already exist on the executor. The working directory stays writable. An empty list clears the additional grants. Omit `writable_roots` to keep the last applied policy. Start a new conversation to change the [network policy](#network-and-local-socket-access). See [restore executor policy](sessions.md#restore-executor-policy) for when the current Environment must match the last applied policy.
 
 ## Remote execution
 
@@ -521,7 +521,7 @@ Configure the connection with current application-owned credentials:
 
 ### Replace or restore an Environment
 
-A Session captures one Environment. Tool replacement cannot change the Environment, and it does not belong in `update(tools=...)`. To change the connection or selected executor tools, open a new Session. The same Agent can serve Sessions with different Environments. Restore uses the current Environment you supply. Use [the recorded executor policy](sessions.md#restore-executor-policy) to check that the current configuration matches. Supply current credentials and start new processes through the current Session.
+A Session captures one Environment. Tool replacement cannot change the Environment, and it does not belong in `update(tools=...)`. To change the connection or selected executor tools, open a new Session. The same Agent can serve Sessions with different Environments. Restore uses the current Environment you supply. Check the [executor policy matching rules](sessions.md#restore-executor-policy) for your type of restore. Supply current credentials and start new processes through the current Session.
 
 Python, manual, HTTP MCP and stdio MCP tools can coexist with an Environment. A `StdioMCP` server runs on the host by default, or on the executor with `location="environment"`.
 

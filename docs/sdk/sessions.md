@@ -296,9 +296,9 @@ If saving fails, the run fails. Unfinished child work can prevent saving. Live p
 
 ### Restore executor policy
 
-When a portable checkpoint or local history records an executor policy, supply a current Environment that matches the recorded policy. Use the last applied write roots, including a replacement made with `submit(writable_roots=...)`. Supply the same working directory and network policy. The SDK checks the policy before admitting model work. Treat the saved policy as a comparison value. Only the Environment supplied by current application code can grant access.
+For a portable checkpoint with an executor, the SDK saves a digest of the applied executor policy if the checkpoint captures a pending manual call, uses a local executor, enables strict writes, or sets a managed network policy. Supply an Environment that matches the saved digest. For an idle checkpoint made with a WSS Environment that omits both `writable_roots` and `network`, restore uses the current Environment without comparing an executor policy digest.
 
-Older records can lack executor policy evidence. The current Environment still sets the grants. Portable checkpoints also compare their saved network digest as described below.
+When reopening with `LocalStorage`, match the policy if the latest recorded receipt includes an executor. To match a policy, supply the same working directory, last applied write roots and network policy. Include any replacement made with `submit(writable_roots=...)`. The Environment supplied by current application code determines the grants. Portable checkpoints also compare their saved network digest as described below.
 
 ### Network policy and offline executors
 
@@ -544,7 +544,9 @@ Cancelling an observer leaves tool work running. Native cancellation may produce
 
 ### Inspect completed execution
 
-`ExecutionItemCompleted` from `agents.observation` carries a command, patch, or MCP item in `event.item`. Match its `thread_id`, `turn_id`, and `id` to the retained item from `session.items()`. After an `EventGap` or a reopen, read the retained items. Pass `subagent_id` to read a child's history.
+`ExecutionItemCompleted` from `agents.observation` carries a command, patch, or MCP item in `event.item`. Match its native `thread_id`, `turn_id`, and `call_id` to the typed completion from `session.items()`. If another row uses the event item's `id`, the typed history item can have a different `id` as its history cursor.
+
+`session.items()` retains provider `function_call` and `function_call_output` rows alongside typed execution items. After an `EventGap` or a reopen, read the retained items. Pass `subagent_id` to read a child's history.
 
 Execution items carry a call ID and a status when the runtime records them. Command records can include the original `argv`, working directory, exit code, and output. Patch records can include the changes and output. MCP records can include arguments and the result or error. Core can shorten command output and MCP results in history. An interrupted call can lack a completion item. When a field or completion is missing, treat that evidence as unknown and check your application records before assuming the outcome.
 
@@ -627,6 +629,8 @@ For instruction matching and trust during restore, see [store and trust checkpoi
 Pass `instruction_files=[Path("method.md")]` to `agent.session()` to load trusted UTF-8 files as part of the application instructions. The SDK reads these paths on the application host. Choose them in trusted code. When restoring a portable checkpoint, supply matching instructions and file content.
 
 Read `recorded_turn.get("receipt")` from `session.turns()` to inspect the settings the runtime selected for the turn's latest recorded model sampling attempt. The receipt can identify the model, reasoning effort, Codex revision and source tree, whether user configuration applied, and the selected executor and approval policy. The executor entry describes its write roots and network policy. The receipt lists loaded instruction file paths, source categories and SHA-256 hashes, along with the hash of the developer instructions.
+
+Receipts recorded in a live Session or retained in trusted `LocalStorage` include the policy for each executor the step selected. In `receipt["executors"]`, `[]` means the observed step selected no executor. After portable restore, `None` means the checkpoint withheld executor policy details. The other recorded settings remain available.
 
 Use the file hash to check the version of a method file the runtime loaded. The receipt describes the runtime's settings. The provider can still reject or route the request. To verify later tool reads or external effects, use their records separately. Treat missing receipts or fields as unknown.
 
