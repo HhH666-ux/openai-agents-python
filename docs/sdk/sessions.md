@@ -546,7 +546,7 @@ Cancelling an observer leaves tool work running. Native cancellation may produce
 
 `ExecutionItemCompleted` from `agents.observation` carries a command, patch, or MCP item in `event.item`. Match its native `thread_id`, `turn_id`, and `call_id` to the typed completion from `session.items()`. If another row uses the event item's `id`, the typed history item can have a different `id` as its history cursor.
 
-`session.items()` retains provider `function_call` and `function_call_output` rows alongside typed execution items. After an `EventGap` or a reopen, read the retained items. Pass `subagent_id` to read a child's history.
+`session.items()` retains provider `function_call` and `function_call_output` rows alongside typed execution items. After an SDK upgrade, the same retained history can yield additional provider rows. After an `EventGap` or a reopen, read the retained items. Pass `subagent_id` to read a child's history.
 
 Execution items carry a call ID and a status when the runtime records them. Command records can include the original `argv`, working directory, exit code, and output. Patch records can include the changes and output. MCP records can include arguments and the result or error. Core can shorten command output and MCP results in history. An interrupted call can lack a completion item. When a field or completion is missing, treat that evidence as unknown and check your application records before assuming the outcome.
 
