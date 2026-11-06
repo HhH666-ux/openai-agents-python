@@ -194,6 +194,7 @@ def generation_span(
     span_id: str | None = None,
     parent: Trace | Span[Any] | None = None,
     disabled: bool = False,
+    tools: Sequence[Mapping[str, Any]] | None = None,
 ) -> Span[GenerationSpanData]:
     """Create a new generation span. The span will not be started automatically, you should either
     do `with generation_span() ...` or call `span.start()` + `span.finish()` manually.
@@ -226,6 +227,7 @@ def generation_span(
             model=model,
             model_config=model_config,
             usage=usage,
+            tools=tools,
         ),
         span_id=span_id,
         parent=parent,

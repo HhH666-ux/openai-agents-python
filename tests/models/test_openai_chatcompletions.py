@@ -520,6 +520,41 @@ async def test_get_response_traces_synthesized_content_filter_refusal(monkeypatc
 
 @pytest.mark.allow_call_model_methods
 @pytest.mark.asyncio
+async def test_generation_span_records_converted_tools() -> None:
+    class DummyCompletions:
+        async def create(self, **kwargs: Any) -> Any:
+            return _minimal_chat_completion()
+
+    class DummyClient:
+        def __init__(self) -> None:
+            self.chat = type("_Chat", (), {"completions": DummyCompletions()})()
+            self.base_url = httpx2.URL("https://custom.example.test/v1/")
+
+    model = OpenAIChatCompletionsModel(model="gpt-4", openai_client=DummyClient())  # type: ignore[arg-type]
+
+    @function_tool(name_override="get_weather")
+    def get_weather(city: str) -> str:
+        """Return the weather for a city."""
+        return "sunny"
+
+    with trace(workflow_name="generation-span-tools"):
+        await model.get_response(
+            system_instructions=None,
+            input="hi",
+            model_settings=ModelSettings(),
+            tools=[get_weather],
+            output_schema=None,
+            handoffs=[],
+            tracing=ModelTracing.ENABLED,
+        )
+
+    generation = next(span for span in fetch_ordered_spans() if span.span_data.type == "generation")
+    assert generation.span_data.tools is not None
+    assert generation.span_data.tools[0]["function"]["name"] == "get_weather"
+
+
+@pytest.mark.allow_call_model_methods
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("message", "expected_output_type", "expected_content_type"),
     [

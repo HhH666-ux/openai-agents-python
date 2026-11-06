@@ -648,6 +648,8 @@ class OpenAIChatCompletionsModel(Model):
             converted_tools.append(Converter.convert_handoff_tool(handoff))
 
         converted_tools = _to_dump_compatible(converted_tools)
+        if tracing.include_data():
+            span.span_data.tools = converted_tools
         tools_param = converted_tools if converted_tools else omit
         # Chat Completions rejects parallel_tool_calls unless tools are present, so derive it
         # from the converted list, which also covers handoff-only turns.

@@ -564,6 +564,8 @@ class LitellmModel(Model):
             converted_tools.append(Converter.convert_handoff_tool(handoff))
 
         converted_tools = _to_dump_compatible(converted_tools)
+        if tracing.include_data():
+            span.span_data.tools = converted_tools
         parallel_tool_calls = model_settings.parallel_tool_calls if converted_tools else None
 
         if _debug.DONT_LOG_MODEL_DATA:

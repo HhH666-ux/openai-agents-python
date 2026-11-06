@@ -546,3 +546,13 @@ def test_trace_to_json_only_includes_tracing_api_key_when_requested():
         with_key = tr.to_json(include_tracing_api_key=True)
         assert with_key is not None
         assert with_key["tracing_api_key"] == "secret-key"
+
+
+def test_generation_span_records_tools_in_span_data() -> None:
+    tools = [{"type": "function", "function": {"name": "get_weather"}}]
+
+    with generation_span(tools=tools) as span:
+        pass
+
+    assert span.span_data.tools == tools
+    assert span.span_data.export()["tools"] == tools
