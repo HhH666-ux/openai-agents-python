@@ -1056,3 +1056,32 @@ def test_assistant_messages_in_history():
     assert messages[1]["content"] == "Hello?"
     assert messages[2]["role"] == "user"
     assert messages[2]["content"] == "What was my Name?"
+
+
+class TestNamedEasyInputMessages:
+    """Easy input messages may carry an optional speaker ``name`` (#5595).
+
+    The nested handoff history parser restores records written as
+    ``role (name): content`` into items with a ``name`` key; those items must
+    convert to Chat Completions messages (which support ``name``) instead of
+    raising ``UserError``.
+    """
+
+    def test_named_user_message_is_forwarded(self):
+        messages = Converter.items_to_messages(
+            [
+                {"role": "user", "name": "Dana", "content": "Hi, I need my subscription history."},
+                {"role": "assistant", "name": "Support", "content": "Sure, let me look into it."},
+            ]
+        )
+
+        assert messages == [
+            {"role": "user", "name": "Dana", "content": "Hi, I need my subscription history."},
+            {"role": "assistant", "name": "Support", "content": "Sure, let me look into it."},
+        ]
+
+    def test_name_is_absent_when_not_provided(self):
+        messages = Converter.items_to_messages([{"role": "user", "content": "Hello"}])
+
+        assert messages == [{"role": "user", "content": "Hello"}]
+        assert "name" not in messages[0]

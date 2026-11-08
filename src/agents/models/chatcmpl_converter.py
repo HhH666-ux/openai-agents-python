@@ -291,7 +291,10 @@ class Converter:
         keys = set(item)
         if not {"content", "role"} <= keys:
             return None
-        if not keys <= {"content", "role", "type", "phase"}:
+        # ``name`` carries an optional speaker name; it is valid on Chat
+        # Completions messages and is restored by the nested handoff history
+        # parser for records written as ``role (name): content``.
+        if not keys <= {"content", "role", "type", "phase", "name"}:
             return None
         if "type" in item and item["type"] != "message":
             return None
@@ -691,6 +694,7 @@ class Converter:
             if easy_msg := cls.maybe_easy_input_message(item):
                 role = easy_msg["role"]
                 content = easy_msg["content"]
+                speaker_name = cast("str | None", easy_msg.get("name"))
 
                 if role == "user":
                     flush_assistant_message()
@@ -698,6 +702,8 @@ class Converter:
                         "role": "user",
                         "content": cls.extract_all_content(content),
                     }
+                    if speaker_name:
+                        msg_user["name"] = speaker_name
                     result.append(msg_user)
                 elif role == "system":
                     flush_assistant_message()
@@ -705,6 +711,8 @@ class Converter:
                         "role": "system",
                         "content": cls.extract_text_content(content),
                     }
+                    if speaker_name:
+                        msg_system["name"] = speaker_name
                     result.append(msg_system)
                 elif role == "developer":
                     flush_assistant_message()
@@ -712,6 +720,8 @@ class Converter:
                         "role": "developer",
                         "content": cls.extract_text_content(content),
                     }
+                    if speaker_name:
+                        msg_developer["name"] = speaker_name
                     result.append(msg_developer)
                 elif role == "assistant":
                     flush_assistant_message()
@@ -719,6 +729,8 @@ class Converter:
                         "role": "assistant",
                         "content": cls.extract_text_content(content),
                     }
+                    if speaker_name:
+                        msg_assistant["name"] = speaker_name
                     result.append(msg_assistant)
                 else:
                     raise UserError(f"Unexpected role in easy_input_message: {role}")
